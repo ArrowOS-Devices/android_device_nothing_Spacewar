@@ -42,6 +42,8 @@ import co.aospa.glyph.R;
 import co.aospa.glyph.Constants.Constants;
 import co.aospa.glyph.Manager.SettingsManager;
 import co.aospa.glyph.Preference.GlyphAnimationPreference;
+import co.aospa.glyph.Utils.MigrationUtils;
+import co.aospa.glyph.Utils.ResourceUtils;
 import co.aospa.glyph.Utils.ServiceUtils;
 
 public class NotifsSettingsFragment extends PreferenceFragment implements OnPreferenceChangeListener,
@@ -76,6 +78,11 @@ public class NotifsSettingsFragment extends PreferenceFragment implements OnPref
 
         mListPreference = (ListPreference) findPreference(Constants.GLYPH_NOTIFS_SUB_ANIMATIONS);
         mListPreference.setOnPreferenceChangeListener(this);
+        mListPreference.setEntries(ResourceUtils.getNotificationAnimations());
+        mListPreference.setEntryValues(ResourceUtils.getNotificationAnimations());
+        if (!ArrayUtils.contains(ResourceUtils.getNotificationAnimations(), mListPreference.getValue())) {
+            mListPreference.setValue(MigrationUtils.getNewNotificationPattern(mListPreference.getValue()));
+        }
 
         mGlyphAnimationPreference = (GlyphAnimationPreference) findPreference(Constants.GLYPH_NOTIFS_SUB_PREVIEW);
 
@@ -83,7 +90,7 @@ public class NotifsSettingsFragment extends PreferenceFragment implements OnPref
         mApps = mPackageManager.getInstalledApplications(PackageManager.GET_GIDS);
         Collections.sort(mApps, new ApplicationInfo.DisplayNameComparator(mPackageManager));
         for (ApplicationInfo app : mApps) {
-            if(mPackageManager.getLaunchIntentForPackage(app.packageName) != null  && !ArrayUtils.contains(Constants.APPSTOIGNORE, app.packageName)) { // apps with launcher intent
+            if(mPackageManager.getLaunchIntentForPackage(app.packageName) != null  && !ArrayUtils.contains(Constants.APPS_TO_IGNORE, app.packageName)) { // apps with launcher intent
                 SwitchPreference mSwitchPreference = new SwitchPreference(mScreen.getContext());
                 mSwitchPreference.setKey(app.packageName);
                 mSwitchPreference.setTitle(" " + app.loadLabel(mPackageManager).toString()); // add this space since the layout looks off otherwise
